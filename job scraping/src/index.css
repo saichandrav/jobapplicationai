@@ -1,6 +1,4 @@
-<<<<<<< Updated upstream
 @import "tailwindcss";
-=======
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 * {
@@ -376,4 +374,3 @@ body {
     padding: 1.5rem;
   }
 }
->>>>>>> Stashed changes

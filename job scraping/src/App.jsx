@@ -1,15 +1,3 @@
-<<<<<<< Updated upstream
-import { Navigate, Route, Routes } from 'react-router-dom'
-import Login from './pages/Login'
-
-const App = () => {
-  return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-    </Routes>
-  )
-}
-=======
 import React, { useState } from 'react';
 import Scene from './components/Scene';
 import Auth from './components/Auth';
@@ -25,7 +13,6 @@ const App = () => {
   const [resumeSkills, setResumeSkills] = useState([]);
   
   const allSkills = Array.from(new Set([...profileSkills, ...resumeSkills]));
->>>>>>> Stashed changes
 
   return (
     <>
