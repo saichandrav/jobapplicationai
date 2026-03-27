@@ -29,7 +29,14 @@ const App = () => {
 
           <Route
             path="/auth"
-            element={<AuthPage onAuthenticated={() => navigate('/profile')} />}
+            element={
+              <AuthPage
+                onAuthenticated={(token) => {
+                  if (token) localStorage.setItem('token', token);
+                  navigate('/profile');
+                }}
+              />
+            }
           />
 
           <Route

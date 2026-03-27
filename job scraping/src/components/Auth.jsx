@@ -6,6 +6,7 @@ const Auth = ({ onAuthenticated }) => {
   // 'login', 'signup', 'verify'
   const [mode, setMode] = useState('signup'); 
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [otp, setOtp] = useState(['', '', '', '']);
   
@@ -29,18 +30,52 @@ const Auth = ({ onAuthenticated }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     setIsLoading(true);
-    
-    // Simulate API delay for dramatic effect
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsLoading(false);
-    
-    if (mode === 'login') {
-      onAuthenticated();
-    } else if (mode === 'signup') {
-      setMode('verify');
-    } else if (mode === 'verify') {
-      onAuthenticated();
+
+    try {
+      if (mode === 'login') {
+        const res = await fetch('http://localhost:8000/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: formData.email, password: formData.password }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Login failed');
+        onAuthenticated(data.token);
+        return;
+      }
+
+      if (mode === 'signup') {
+        const res = await fetch('http://localhost:8000/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: formData.name, email: formData.email, password: formData.password }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Signup failed');
+
+        setOtp(['', '', '', '']);
+        setMode('verify');
+        return;
+      }
+
+      if (mode === 'verify') {
+        const res = await fetch('http://localhost:8000/api/auth/verify-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: formData.email, otp: otp.join('') }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Verification failed');
+
+        onAuthenticated(data.token);
+        return;
+      }
+    } catch (err) {
+      setError(err.message || 'Something went wrong');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -141,6 +176,11 @@ const Auth = ({ onAuthenticated }) => {
             </form>
 
             <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+              {error && (
+                <p style={{ color: '#f87171', fontSize: '0.9rem', margin: '0 0 1rem 0' }}>
+                  {error}
+                </p>
+              )}
               <p style={{ color: '#a1a1aa', fontSize: '0.875rem' }}>
                 {mode === 'login' ? "Don't have an account? " : "Already have an account? "}
                 <button 
@@ -211,9 +251,15 @@ const Auth = ({ onAuthenticated }) => {
               </motion.button>
             </form>
 
+            {error && (
+              <p style={{ color: '#f87171', fontSize: '0.9rem', textAlign: 'center', marginTop: '-1rem' }}>
+                {error}
+              </p>
+            )}
+
             <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
               <button 
-                onClick={() => setMode('signup')}
+                onClick={() => { setError(''); setOtp(['', '', '', '']); setMode('signup'); }}
                 style={{ background: 'none', border: 'none', color: '#a1a1aa', fontSize: '0.875rem', cursor: 'pointer', padding: 0 }}
               >
                 Change details or resend code
