@@ -2,12 +2,34 @@ const pdfParse = require('pdf-parse');
 const { OpenAI } = require('openai');
 const Job = require('../models/Job');
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+function getOpenAIClient() {
+  if (!process.env.OPENAI_API_KEY) {
+    return null;
+  }
+
+  return new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+}
+
+function ensureOpenAIConfigured(res) {
+  const openai = getOpenAIClient();
+
+  if (!openai) {
+    res.status(500).json({
+      error: 'OPENAI_API_KEY is missing in backend/.env',
+    });
+    return null;
+  }
+
+  return openai;
+}
 
 const extractResume = async (req, res) => {
   try {
+    const openai = ensureOpenAIConfigured(res);
+    if (!openai) return;
+
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
 
     const pdfData = await pdfParse(req.file.buffer);
@@ -38,6 +60,9 @@ const extractResume = async (req, res) => {
 
 const matchJobs = async (req, res) => {
   try {
+    const openai = ensureOpenAIConfigured(res);
+    if (!openai) return;
+
     const { skills } = req.body;
     if (!skills || !Array.isArray(skills)) return res.status(400).json({ error: 'Skills array is required' });
 
@@ -78,6 +103,9 @@ const matchJobs = async (req, res) => {
 
 const tailorResume = async (req, res) => {
   try {
+    const openai = ensureOpenAIConfigured(res);
+    if (!openai) return;
+
     const { resumeText, jobDescription } = req.body;
     
     const prompt = `You are an expert resume writer. Tailor the following resume to better match the given job description. Keep the truthfulness intact but highlight the most relevant skills.\n\nJob Description:\n${jobDescription}\n\nOriginal Resume:\n${resumeText}`;

@@ -1,6 +1,6 @@
 import React, { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Environment, Float, Sphere, Stars } from '@react-three/drei';
+import { Float, Sphere, Stars } from '@react-three/drei';
 import * as THREE from 'three';
 
 const ParticleRing = ({ count = 200, radius = 4 }) => {
@@ -100,17 +100,18 @@ const CoreNode = () => {
 const Scene = () => {
   return (
     <div className="canvas-container">
-      <Canvas camera={{ position: [0, 0, 8], fov: 45 }}>
+      <Canvas camera={{ position: [0, 0, 8], fov: 45 }} dpr={[1, 1.5]}>
         <color attach="background" args={['#050505']} />
-        <ambientLight intensity={0.5} />
+        <fog attach="fog" args={['#050505', 8, 18]} />
+        <ambientLight intensity={0.7} />
+        <hemisphereLight intensity={0.8} groundColor="#050505" color="#60a5fa" />
         <pointLight position={[10, 10, 10]} intensity={1} color="#a78bfa" />
         <pointLight position={[-10, -10, -10]} intensity={0.5} color="#3b82f6" />
+        <spotLight position={[0, 8, 6]} intensity={1.2} angle={0.35} penumbra={1} color="#38bdf8" />
         
         <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
         <ParticleRing />
         <CoreNode />
-        
-        <Environment preset="city" />
       </Canvas>
     </div>
   );

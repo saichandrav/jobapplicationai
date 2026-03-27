@@ -106,11 +106,11 @@ const UserProfile = ({ onProfileSaved }) => {
           try {
             const { error } = await supabase.from('users_profile').insert([{ target_role: role, experience: experience, skills: skills }]);
             if (error) throw error;
-            if (onProfileSaved) onProfileSaved();
+            if (onProfileSaved) onProfileSaved(skills);
           } catch (err) {
             console.error("Supabase Error:", err);
             // Fallback for demo without real credentials
-            if (onProfileSaved) onProfileSaved();
+            if (onProfileSaved) onProfileSaved(skills);
           } finally {
             setIsLoading(false);
           }
